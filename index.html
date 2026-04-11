@@ -335,6 +335,8 @@ async function deleteSelected() {
 // 초기화
 loadSettings();
 loadList();
+// 앱 시작 시 초기 히스토리 등록
+history.replaceState({ view: "list" }, "", "");
 </script>
 </body>
 </html>
