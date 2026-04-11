@@ -188,9 +188,9 @@ function showView(v, reload, pushHistory) {
 // 브라우저 뒤로가기 처리
 window.addEventListener("popstate", (e) => {
   const v = e.state?.view;
-  if (!v || v === "list") showView("list", true, false);
+  if (!v || v === "list") showView("list", false, false);
   else if (v === "read") showView("read", false, false);
-  else showView("list", true, false);
+  else showView("list", false, false);
 });
 
 // 토스트
