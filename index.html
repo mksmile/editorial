@@ -177,12 +177,21 @@ function toggleSettings() {
 }
 
 // 뷰 전환 (list로 갈 때만 재로딩, 나머지는 그냥 전환)
-function showView(v, reload) {
+function showView(v, reload, pushHistory) {
   ["List","Write","Read"].forEach(n => document.getElementById("view"+n).style.display = "none");
   document.getElementById("view" + v.charAt(0).toUpperCase() + v.slice(1)).style.display = "block";
   document.getElementById("newBtn").style.display = v === "list" ? "" : "none";
   if (v === "list" && reload !== false) loadList();
+  if (pushHistory !== false) history.pushState({ view: v }, "", "");
 }
+
+// 브라우저 뒤로가기 처리
+window.addEventListener("popstate", (e) => {
+  const v = e.state?.view;
+  if (!v || v === "list") showView("list", true, false);
+  else if (v === "read") showView("read", false, false);
+  else showView("list", true, false);
+});
 
 // 토스트
 function toast(msg) {
