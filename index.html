@@ -156,9 +156,9 @@
   <button class="scroll-play" id="scrollPlayBtn" onclick="toggleScrollPlay()">⏸</button>
   <div style="flex:1;">
     <div style="font-size:12px;color:#888;margin-bottom:4px;">
-      스크롤 속도 <span id="scrollSpeedVal" style="color:#4a90d9;font-weight:700;">3</span>
+      스크롤 속도 <span id="scrollSpeedVal" style="color:#4a90d9;font-weight:700;">5</span>
     </div>
-    <input type="range" min="1" max="10" value="3" id="scrollSpeed"
+    <input type="range" min="1" max="10" value="5" id="scrollSpeed"
       oninput="document.getElementById('scrollSpeedVal').textContent=this.value; restartScroll();">
   </div>
   <button class="scroll-close" onclick="stopScroll()">✕</button>
