@@ -139,10 +139,6 @@
         <button class="btn-outline-blue" onclick="openEdit()">✏️ 수정</button>
         <button class="btn-outline-red" onclick="deleteSelected()">🗑️ 삭제</button>
       </div>
-      <button onclick="toggleScroll()" id="scrollToggleBtn"
-        style="margin-top:14px;width:100%;padding:11px;border-radius:10px;border:1.5px solid #4a90d9;background:#fff;color:#4a90d9;font-weight:700;cursor:pointer;font-size:14px;">
-        ▶ 자동 스크롤 시작
-      </button>
     </div>
   </div>
 </div>
@@ -150,11 +146,10 @@
 <div class="scroll-bar" id="scrollBar">
   <button class="scroll-play" id="scrollPlayBtn" onclick="toggleScrollPlay()">⏸</button>
   <div style="flex:1">
-    <div style="font-size:12px;color:#888;margin-bottom:4px">스크롤 속도</div>
+    <div style="font-size:12px;color:#888;margin-bottom:4px">스크롤 속도 <span id="scrollSpeedVal" style="color:#4a90d9;font-weight:700">3</span></div>
     <input type="range" class="scroll-speed" min="1" max="10" value="3" id="scrollSpeed"
-      oninput="document.getElementById('scrollSpeedVal').textContent=this.value">
+      oninput="document.getElementById('scrollSpeedVal').textContent=this.value; restartScroll();">
   </div>
-  <span id="scrollSpeedVal" style="font-size:14px;color:#4a90d9;font-weight:700;min-width:20px">3</span>
   <button onclick="stopScroll()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#999">✕</button>
 </div>
 
