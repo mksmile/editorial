@@ -39,6 +39,9 @@
   .btn-cancel { flex: 1; padding: 13px; border-radius: 10px; border: 1.5px solid #dde3ec; background: #fff; color: #555; font-weight: 700; cursor: pointer; font-size: 15px; }
   .btn-save { flex: 2; padding: 13px; border-radius: 10px; border: none; background: #4a90d9; color: #fff; font-weight: 700; cursor: pointer; font-size: 15px; }
 
+  /* 진행 바 */
+  .progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: #4a90d9; width: 0%; z-index: 999; transition: width 0.1s; }
+
   /* 읽기 */
   .read-box { background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
   .read-top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
@@ -75,6 +78,8 @@
 </style>
 </head>
 <body>
+
+<div class="progress-bar" id="progressBar"></div>
 
 <header>
   <h1 onclick="goList()">📰 사설 보관함 <span class="badge" id="badge">0</span></h1>
@@ -290,6 +295,7 @@ function openRead(id) {
   titleEl.textContent = selectedItem.title;
   titleEl.style.borderBottom = `3px solid ${COLORS[selectedItem.paper]||COLORS['기타']}`;
   document.getElementById("readContent").textContent = selectedItem.content;
+  document.getElementById("progressBar").style.width = "0%";
   showView("read", false, true);
   window.scrollTo(0, 0);
 }
@@ -299,7 +305,7 @@ function openWrite() {
   editMode = false; selPaper = "한겨레";
   document.getElementById("formTitle").textContent = "✏️ 새 사설 저장";
   document.getElementById("saveBtn").textContent = "💾 저장하기";
-  document.getElementById("fDate").value = "";
+  document.getElementById("fDate").value = todayStr();
   document.getElementById("fTitle").value = "";
   document.getElementById("fContent").value = "";
   renderPaperBtns();
@@ -406,7 +412,22 @@ function stopScroll() {
   document.getElementById("scrollPlayBtn").textContent = "⏸";
 }
 
-// ── 초기화 ───────────────────────────
+// 오늘 날짜 기본값
+function todayStr() {
+  const d = new Date();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+// 진행 바
+function updateProgress() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? Math.round(scrollTop / docHeight * 100) : 0;
+  document.getElementById("progressBar").style.width = pct + "%";
+}
+window.addEventListener("scroll", updateProgress);
 loadSettings();
 history.replaceState({view:"list"}, "", "");
 loadList();
