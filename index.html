@@ -255,28 +255,41 @@ function selectPaper(p) { selPaper = p; renderPaperBtns(); }
 
 // ── 목록 ─────────────────────────────
 const CACHE_KEY = "editorialCache";
+let cacheLoaded = false;
 
-async function loadList() {
-  // 캐시 먼저 즉시 표시
-  const cached = localStorage.getItem(CACHE_KEY);
-  if (cached) {
-    items = JSON.parse(cached);
-    document.getElementById("badge").textContent = items.length;
-    renderList();
-  } else {
+async function loadList(forceRefresh) {
+  // 캐시 먼저 즉시 표시 (최초 1회만)
+  if (!cacheLoaded) {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      items = JSON.parse(cached);
+      document.getElementById("badge").textContent = items.length;
+      renderList();
+      cacheLoaded = true;
+      // 캐시가 있으면 백그라운드에서 조용히 갱신
+      fetchFromGAS();
+      return;
+    }
+  }
+  // 캐시 없거나 강제 갱신이면 로딩 표시 후 fetch
+  if (!cacheLoaded) {
     document.getElementById("listArea").innerHTML =
       "<p style='text-align:center;color:#aaa;margin-top:40px'>불러오는 중...</p>";
   }
-  // 백그라운드에서 최신 데이터 가져오기
+  await fetchFromGAS();
+}
+
+async function fetchFromGAS() {
   try {
     const res = await fetch(GAS_URL + "?action=list");
     const data = await res.json();
     items = data.items || [];
     localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+    cacheLoaded = true;
     document.getElementById("badge").textContent = items.length;
     renderList();
   } catch(e) {
-    if (!cached) {
+    if (!cacheLoaded) {
       document.getElementById("listArea").innerHTML =
         "<p style='text-align:center;color:#e74c3c;margin-top:40px'>⚠️ 불러오기 실패</p>";
     }
@@ -358,7 +371,7 @@ async function submitForm() {
     const data = await res.json();
     if (data.ok) {
       toast(editMode ? "✏️ 수정되었습니다!" : "✅ 저장되었습니다!");
-      await loadList();
+      await fetchFromGAS();
       history.replaceState({view:"list"}, "", "");
       showView("list", false, false);
     } else toast("⚠️ 오류: "+data.error);
