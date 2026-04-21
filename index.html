@@ -254,18 +254,32 @@ function renderPaperBtns() {
 function selectPaper(p) { selPaper = p; renderPaperBtns(); }
 
 // ── 목록 ─────────────────────────────
+const CACHE_KEY = "editorialCache";
+
 async function loadList() {
-  document.getElementById("listArea").innerHTML =
-    "<p style='text-align:center;color:#aaa;margin-top:40px'>불러오는 중...</p>";
+  // 캐시 먼저 즉시 표시
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    items = JSON.parse(cached);
+    document.getElementById("badge").textContent = items.length;
+    renderList();
+  } else {
+    document.getElementById("listArea").innerHTML =
+      "<p style='text-align:center;color:#aaa;margin-top:40px'>불러오는 중...</p>";
+  }
+  // 백그라운드에서 최신 데이터 가져오기
   try {
     const res = await fetch(GAS_URL + "?action=list");
     const data = await res.json();
     items = data.items || [];
+    localStorage.setItem(CACHE_KEY, JSON.stringify(items));
     document.getElementById("badge").textContent = items.length;
     renderList();
   } catch(e) {
-    document.getElementById("listArea").innerHTML =
-      "<p style='text-align:center;color:#e74c3c;margin-top:40px'>⚠️ 불러오기 실패</p>";
+    if (!cached) {
+      document.getElementById("listArea").innerHTML =
+        "<p style='text-align:center;color:#e74c3c;margin-top:40px'>⚠️ 불러오기 실패</p>";
+    }
   }
 }
 function renderList() {
@@ -362,6 +376,7 @@ async function deleteSelected() {
     if (data.ok) {
       toast("🗑️ 삭제되었습니다.");
       items = items.filter(i => i.id != selectedItem.id);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(items));
       document.getElementById("badge").textContent = items.length;
       renderList();
       history.replaceState({view:"list"}, "", "");
