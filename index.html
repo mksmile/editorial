@@ -13,7 +13,7 @@
   /* 헤더 */
   header { background: #1a1a2e; color: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
   .header-left { display: flex; align-items: center; gap: 6px; }
-  .mode-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px; padding: 6px 10px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+  .mode-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px; padding: 6px 10px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 5px; transition: all 0.2s; white-space: nowrap; }
   .mode-btn.active { background: #fff2; color: #fff; }
   .mode-btn .badge { background: #4a90d9; border-radius: 10px; padding: 1px 7px; font-size: 12px; color: #fff; }
   .mode-btn.blog-active .badge { background: #e67e22; }
@@ -265,6 +265,8 @@ function toggleSettings() {
 // ── 모드 전환 ─────────────────────────
 function switchMode(m) {
   mode = m;
+  document.getElementById("btnModeEditorial").style.display = m==="blog" ? "none" : "";
+  document.getElementById("btnModeBlog").style.display = m==="editorial" ? "none" : "";
   document.getElementById("btnModeEditorial").className = "mode-btn" + (m==="editorial"?" active":"");
   document.getElementById("btnModeBlog").className = "mode-btn" + (m==="blog"?" active blog-active":"");
   document.getElementById("newBtn").className = "new-btn" + (m==="blog"?" blog":"");
@@ -716,6 +718,7 @@ window.addEventListener("scroll", updateProgress);
 loadSettings();
 loadBlogSources();
 history.replaceState({view:"list", mode:"editorial"}, "", "");
+document.getElementById("btnModeBlog").style.display = "none";
 loadEditorialList();
 </script>
 </body>
