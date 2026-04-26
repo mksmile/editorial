@@ -406,7 +406,7 @@ function renderBlogTabs() {
   const allActive = activeSourceId === "all";
   let html = `<button class="blog-tab ${allActive?"active":""}" style="${allActive?"background:#e67e22":""}" onclick="setActiveSource('all')">전체</button>`;
   html += blogSources.map(s => {
-    const a = activeSourceId === s.id;
+    const a = activeSourceId == s.id;
     return `<button class="blog-tab ${a?"active":""}" style="${a?"background:"+s.color:""}" onclick="setActiveSource('${s.id}')">${s.name}</button>`;
   }).join("");
   html += `<button class="blog-tab-manage" onclick="openModal()">⚙️ 관리</button>`;
@@ -424,7 +424,7 @@ function renderList() {
   let list = mode === "editorial" ? items : blogItems;
 
   if (mode === "blog" && activeSourceId !== "all") {
-    const src = blogSources.find(s => s.id === activeSourceId);
+    const src = blogSources.find(s => s.id == activeSourceId);
     if (src) list = list.filter(i => i.source === src.name);
   }
   list = list.filter(i => i.title.includes(q) || i.content.includes(q) || (i.paper||i.source||"").includes(q));
@@ -718,8 +718,10 @@ window.addEventListener("scroll", updateProgress);
 
 // ── 초기화 ───────────────────────────
 loadSettings();
-loadBlogSources();
 history.replaceState({view:"list", mode:"editorial"}, "", "");
+// 블로그 소스 + 블로그 글 동시 로드 (배지 표시 위해)
+loadBlogSources();
+fetchBlog();
 loadEditorialList();
 </script>
 </body>
