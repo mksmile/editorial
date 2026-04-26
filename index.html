@@ -4,15 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>사설 보관함</title>
+<title>보관함</title>
 <style>
   :root { --fs: 18px; --lh: 1.9; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans KR', sans-serif; background: #f4f6f9; min-height: 100vh; font-size: var(--fs); padding-bottom: 80px; }
-  header { background: #1a1a2e; color: #fff; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  header h1 { font-size: 18px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  .badge { background: #4a90d9; border-radius: 12px; padding: 2px 10px; font-size: 13px; }
+
+  /* 헤더 */
+  header { background: #1a1a2e; color: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 6px; }
+  .mode-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px; padding: 6px 10px; border-radius: 8px; font-weight: 700; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+  .mode-btn.active { background: #fff2; color: #fff; }
+  .mode-btn .badge { background: #4a90d9; border-radius: 10px; padding: 1px 7px; font-size: 12px; color: #fff; }
+  .mode-btn.blog-active .badge { background: #e67e22; }
+  .header-right { display: flex; align-items: center; gap: 6px; }
+  .settings-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+  .new-btn { background: #4a90d9; color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-weight: 700; cursor: pointer; font-size: 14px; }
+  .new-btn.blog { background: #e67e22; }
+
+  /* 진행바 */
+  .progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: #4a90d9; width: 0%; z-index: 999; transition: width 0.1s; }
+
+  /* 설정 패널 */
+  .settings-panel { display: none; background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 18px; }
+  .settings-panel.open { display: block; }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .settings-row:last-child { margin-bottom: 0; }
+  .settings-label { font-weight: 700; font-size: 14px; color: #444; }
+  .range-wrap { display: flex; align-items: center; gap: 10px; }
+  .range-wrap input[type=range] { width: 140px; }
+  .range-val { font-size: 14px; color: #4a90d9; font-weight: 700; min-width: 36px; }
+
   .wrap { max-width: 720px; margin: 0 auto; padding: 18px 14px; }
+
+  /* 검색 */
+  .search { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1.5px solid #dde3ec; font-size: 15px; margin-bottom: 18px; outline: none; background: #fff; }
+
+  /* 블로그 탭 */
+  .blog-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .blog-tab { padding: 6px 16px; border-radius: 20px; border: 2px solid #dde3ec; background: #fff; color: #555; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.15s; }
+  .blog-tab.active { color: #fff; border-color: transparent; }
+  .blog-tab-manage { padding: 6px 12px; border-radius: 20px; border: 2px dashed #dde3ec; background: none; color: #aaa; font-weight: 600; cursor: pointer; font-size: 13px; }
 
   /* 카드 */
   .card { background: #fff; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); cursor: pointer; margin-bottom: 14px; transition: box-shadow 0.2s; }
@@ -22,9 +54,6 @@
   .card-date { color: #999; font-size: 13px; }
   .card-title { font-weight: 700; font-size: 16px; color: #1a1a2e; margin-bottom: 6px; }
   .card-preview { color: #666; font-size: 13px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-  /* 검색 */
-  .search { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1.5px solid #dde3ec; font-size: 15px; margin-bottom: 18px; outline: none; background: #fff; }
 
   /* 폼 */
   .form-box { background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
@@ -38,9 +67,7 @@
   .btn-row { display: flex; gap: 10px; margin-top: 6px; }
   .btn-cancel { flex: 1; padding: 13px; border-radius: 10px; border: 1.5px solid #dde3ec; background: #fff; color: #555; font-weight: 700; cursor: pointer; font-size: 15px; }
   .btn-save { flex: 2; padding: 13px; border-radius: 10px; border: none; background: #4a90d9; color: #fff; font-weight: 700; cursor: pointer; font-size: 15px; }
-
-  /* 진행 바 */
-  .progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: #4a90d9; width: 0%; z-index: 999; transition: width 0.1s; }
+  .btn-save.blog { background: #e67e22; }
 
   /* 읽기 */
   .read-box { background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
@@ -53,6 +80,22 @@
   .btn-outline-blue { border: 1.5px solid #4a90d9; background: #fff; color: #4a90d9; border-radius: 10px; padding: 11px; font-weight: 700; cursor: pointer; font-size: 14px; flex: 1; }
   .btn-outline-red { border: 1.5px solid #e74c3c; background: #fff; color: #e74c3c; border-radius: 10px; padding: 11px; font-weight: 700; cursor: pointer; font-size: 14px; flex: 1; }
 
+  /* 블로그 관리 모달 */
+  .modal-bg { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 500; }
+  .modal-bg.open { display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px; }
+  .modal-title { font-weight: 700; font-size: 18px; margin-bottom: 18px; color: #1a1a2e; }
+  .source-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 10px; background: #f4f6f9; margin-bottom: 8px; }
+  .source-name { font-weight: 600; font-size: 15px; }
+  .source-del { background: none; border: none; color: #e74c3c; font-size: 18px; cursor: pointer; }
+  .modal-add { display: flex; gap: 8px; margin-top: 14px; }
+  .modal-add input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #dde3ec; font-size: 15px; outline: none; font-family: inherit; margin-bottom: 0; }
+  .modal-add button { padding: 10px 18px; border-radius: 10px; border: none; background: #e67e22; color: #fff; font-weight: 700; cursor: pointer; font-size: 14px; }
+  .color-picks { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .color-pick { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+  .color-pick.selected { border-color: #333; }
+  .modal-close { width: 100%; margin-top: 16px; padding: 11px; border-radius: 10px; border: 1.5px solid #dde3ec; background: #fff; color: #555; font-weight: 700; cursor: pointer; font-size: 15px; }
+
   /* 자동스크롤 바 */
   .scroll-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #eee; padding: 10px 18px 20px; z-index: 200; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); }
   .scroll-bar.on { display: flex; align-items: center; gap: 12px; }
@@ -60,18 +103,6 @@
   .scroll-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #999; flex-shrink: 0; }
   input[type=range] { width: 100%; }
 
-  /* 설정 */
-  .settings-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
-  .settings-panel { display: none; background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 18px; }
-  .settings-panel.open { display: block; }
-  .settings-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .settings-row:last-child { margin-bottom: 0; }
-  .settings-label { font-weight: 700; font-size: 14px; color: #444; }
-  .range-wrap { display: flex; align-items: center; gap: 10px; }
-  .range-wrap input[type=range] { width: 140px; }
-  .range-val { font-size: 14px; color: #4a90d9; font-weight: 700; min-width: 36px; }
-
-  /* 공통 */
   .empty { text-align: center; color: #aaa; margin-top: 60px; }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
   .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; border-radius: 10px; padding: 10px 24px; font-size: 14px; z-index: 999; box-shadow: 0 4px 16px rgba(0,0,0,0.2); display: none; white-space: nowrap; }
@@ -82,18 +113,21 @@
 <div class="progress-bar" id="progressBar"></div>
 
 <header>
-  <h1 onclick="goList()">📰 사설 보관함 <span class="badge" id="badge">0</span></h1>
-  <div style="display:flex;align-items:center;gap:6px;">
-    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
-    <button id="newBtn" onclick="openWrite()"
-      style="background:#4a90d9;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:700;cursor:pointer;font-size:14px;">
-      + 새 사설
+  <div class="header-left">
+    <button class="mode-btn active" id="btnModeEditorial" onclick="switchMode('editorial')">
+      📰 사설 <span class="badge" id="badgeEditorial">0</span>
     </button>
+    <button class="mode-btn" id="btnModeBlog" onclick="switchMode('blog')">
+      📖 블로그 <span class="badge" id="badgeBlog">0</span>
+    </button>
+  </div>
+  <div class="header-right">
+    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+    <button class="new-btn" id="newBtn" onclick="openWrite()">+ 새 글</button>
   </div>
 </header>
 
 <div class="wrap">
-
   <!-- 설정 패널 -->
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-row">
@@ -114,22 +148,23 @@
 
   <!-- 목록 -->
   <div id="viewList">
-    <input class="search" type="text" placeholder="🔍  제목, 신문사, 내용으로 검색" oninput="renderList()" id="searchInput">
+    <input class="search" type="text" placeholder="🔍  검색" oninput="renderList()" id="searchInput">
+    <div class="blog-tabs" id="blogTabs" style="display:none"></div>
     <div id="listArea"></div>
   </div>
 
-  <!-- 입력/수정 폼 -->
+  <!-- 폼 -->
   <div id="viewWrite" style="display:none">
     <div class="form-box">
-      <div class="form-title" id="formTitle">✏️ 새 사설 저장</div>
-      <label>신문사</label>
+      <div class="form-title" id="formTitle">✏️ 새 글 저장</div>
+      <label id="sourceLabel">신문사</label>
       <div class="paper-btns" id="paperBtns"></div>
-      <label>날짜</label>
+      <label id="dateLabel">날짜</label>
       <input type="date" id="fDate">
       <label>제목</label>
-      <input type="text" id="fTitle" placeholder="사설 제목을 입력하세요">
+      <input type="text" id="fTitle" placeholder="제목을 입력하세요">
       <label>본문 <span class="hint">※ "광고" 단독 줄 자동 제거</span></label>
-      <textarea id="fContent" placeholder="사설 내용을 붙여넣거나 입력하세요"></textarea>
+      <textarea id="fContent" placeholder="내용을 붙여넣거나 입력하세요"></textarea>
       <div class="btn-row">
         <button class="btn-cancel" onclick="cancelForm()">취소</button>
         <button class="btn-save" id="saveBtn" onclick="submitForm()">💾 저장하기</button>
@@ -141,7 +176,7 @@
   <div id="viewRead" style="display:none">
     <div class="read-box">
       <div class="read-top">
-        <button class="back-btn" onclick="showView('list', false, false)">← 목록으로</button>
+        <button class="back-btn" onclick="showView('list',false,false)">← 목록으로</button>
         <button class="scroll-btn" id="scrollToggleBtn" onclick="toggleScroll()">▶ 자동스크롤</button>
       </div>
       <div class="card-meta" id="readMeta"></div>
@@ -153,7 +188,20 @@
       </div>
     </div>
   </div>
+</div>
 
+<!-- 블로그 관리 모달 -->
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">📖 블로그 관리</div>
+    <div id="sourceList"></div>
+    <div class="modal-add">
+      <input type="text" id="newSourceName" placeholder="블로그 이름">
+      <button onclick="addBlogSource()">추가</button>
+    </div>
+    <div class="color-picks" id="colorPicks"></div>
+    <button class="modal-close" onclick="closeModalDirect()">닫기</button>
+  </div>
 </div>
 
 <!-- 자동스크롤 바 -->
@@ -173,10 +221,21 @@
 
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyAct4txTSrXP5yBr3yQp5ohMeFCxrO_WEjFd-gO3eVLpjcghuAFguTtercYmxfTeDc/exec";
-const PAPERS = ["한겨레","경향신문","민중의 소리","기타"];
-const COLORS = {"한겨레":"#4a90d9","경향신문":"#8e44ad","민중의 소리":"#27ae60","기타":"#7f8c8d"};
 
-let items = [], selectedItem = null, editMode = false, selPaper = "한겨레";
+const EDITORIAL_PAPERS = ["한겨레","경향신문","민중의 소리","기타"];
+const EDITORIAL_COLORS = {"한겨레":"#4a90d9","경향신문":"#8e44ad","민중의 소리":"#27ae60","기타":"#7f8c8d"};
+const PALETTE = ["#e74c3c","#e67e22","#f1c40f","#27ae60","#1abc9c","#3498db","#9b59b6","#e91e8c","#607d8b","#795548"];
+
+const CACHE_EDITORIAL = "editorialCache";
+const CACHE_BLOG = "blogCache";
+const CACHE_SOURCES = "blogSourcesCache";
+
+let mode = "editorial"; // editorial | blog
+let items = [], blogItems = [], blogSources = [];
+let selectedItem = null, editMode = false, selPaper = "한겨레";
+let selBlogSource = null, selNewColor = PALETTE[0];
+let cacheEditorialLoaded = false, cacheBlogLoaded = false;
+let activeSourceId = "all";
 
 // ── 설정 ──────────────────────────────
 function loadSettings() {
@@ -203,11 +262,16 @@ function toggleSettings() {
   document.getElementById("settingsPanel").classList.toggle("open");
 }
 
-// ── 토스트 ────────────────────────────
-function toast(msg) {
-  const el = document.getElementById("toast");
-  el.textContent = msg; el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 2500);
+// ── 모드 전환 ─────────────────────────
+function switchMode(m) {
+  mode = m;
+  document.getElementById("btnModeEditorial").className = "mode-btn" + (m==="editorial"?" active":"");
+  document.getElementById("btnModeBlog").className = "mode-btn" + (m==="blog"?" active blog-active":"");
+  document.getElementById("newBtn").className = "new-btn" + (m==="blog"?" blog":"");
+  document.getElementById("blogTabs").style.display = m==="blog" ? "flex" : "none";
+  showView("list", false, false);
+  if (m==="blog" && !cacheBlogLoaded) loadBlogList();
+  else renderList();
 }
 
 // ── 뷰 전환 ──────────────────────────
@@ -216,19 +280,28 @@ function showView(v, reload, push) {
   ["List","Write","Read"].forEach(n =>
     document.getElementById("view"+n).style.display = "none");
   document.getElementById("view"+v.charAt(0).toUpperCase()+v.slice(1)).style.display = "block";
-  document.getElementById("newBtn").style.display = v === "list" ? "" : "none";
-  if (v === "list" && reload) loadList();
-  if (push) history.pushState({view:v}, "", "");
+  document.getElementById("newBtn").style.display = v==="list" ? "" : "none";
+  if (v==="list" && reload) { mode==="editorial" ? loadEditorialList() : loadBlogList(); }
+  if (push) history.pushState({view:v, mode}, "", "");
 }
-
-function goList() { showView("list", true, false); }
 
 window.addEventListener("popstate", e => {
   const v = e.state?.view || "list";
+  if (e.state?.mode) mode = e.state.mode;
   showView(v, false, false);
 });
 
 // ── 유틸 ─────────────────────────────
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function toInputDate(d) {
+  if (!d) return "";
+  const dt = new Date(d);
+  if (!isNaN(dt)) return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`;
+  return d.substring(0,10);
+}
 function fmtDate(d) {
   if (!d) return "";
   const dt = new Date(d);
@@ -236,174 +309,354 @@ function fmtDate(d) {
   const [y,m,day] = d.split("-");
   return `${parseInt(y)}년 ${parseInt(m)}월 ${parseInt(day)}일`;
 }
-function tagHtml(p) {
-  return `<span class="tag" style="background:${COLORS[p]||COLORS['기타']}">${p}</span>`;
+function tagHtml(name, color) {
+  return `<span class="tag" style="background:${color}">${name}</span>`;
 }
 function removeAds(t) {
   return t.split("\n").filter(l => l.trim() !== "광고").join("\n").trim();
 }
-
-// ── 신문사 버튼 ───────────────────────
-function renderPaperBtns() {
-  document.getElementById("paperBtns").innerHTML = PAPERS.map(p => {
-    const active = selPaper === p;
-    return `<button class="paper-btn" onclick="selectPaper('${p}')"
-      style="${active ? `background:${COLORS[p]};border-color:${COLORS[p]};color:#fff` : ''}">${p}</button>`;
-  }).join("");
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 2500);
 }
-function selectPaper(p) { selPaper = p; renderPaperBtns(); }
-
-// ── 목록 ─────────────────────────────
-const CACHE_KEY = "editorialCache";
-let cacheLoaded = false;
-
-async function loadList(forceRefresh) {
-  // 캐시 먼저 즉시 표시 (최초 1회만)
-  if (!cacheLoaded) {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      items = JSON.parse(cached);
-      document.getElementById("badge").textContent = items.length;
-      renderList();
-      cacheLoaded = true;
-      // 캐시가 있으면 백그라운드에서 조용히 갱신
-      fetchFromGAS();
-      return;
-    }
-  }
-  // 캐시 없거나 강제 갱신이면 로딩 표시 후 fetch
-  if (!cacheLoaded) {
-    document.getElementById("listArea").innerHTML =
-      "<p style='text-align:center;color:#aaa;margin-top:40px'>불러오는 중...</p>";
-  }
-  await fetchFromGAS();
+function getSourceColor(name) {
+  const s = blogSources.find(s => s.name === name);
+  return s ? s.color : "#7f8c8d";
 }
 
-async function fetchFromGAS() {
+// ── 사설 목록 ─────────────────────────
+async function loadEditorialList() {
+  const cached = localStorage.getItem(CACHE_EDITORIAL);
+  if (cached && !cacheEditorialLoaded) {
+    items = JSON.parse(cached);
+    document.getElementById("badgeEditorial").textContent = items.length;
+    cacheEditorialLoaded = true;
+    renderList();
+    fetchEditorial();
+    return;
+  }
+  if (!cacheEditorialLoaded)
+    document.getElementById("listArea").innerHTML = "<p style='text-align:center;color:#aaa;margin-top:40px'>불러오는 중...</p>";
+  await fetchEditorial();
+}
+async function fetchEditorial() {
   try {
     const res = await fetch(GAS_URL + "?action=list");
     const data = await res.json();
     items = data.items || [];
-    localStorage.setItem(CACHE_KEY, JSON.stringify(items));
-    cacheLoaded = true;
-    document.getElementById("badge").textContent = items.length;
-    renderList();
+    localStorage.setItem(CACHE_EDITORIAL, JSON.stringify(items));
+    cacheEditorialLoaded = true;
+    document.getElementById("badgeEditorial").textContent = items.length;
+    if (mode === "editorial") renderList();
   } catch(e) {
-    if (!cacheLoaded) {
-      document.getElementById("listArea").innerHTML =
-        "<p style='text-align:center;color:#e74c3c;margin-top:40px'>⚠️ 불러오기 실패</p>";
-    }
+    if (!cacheEditorialLoaded)
+      document.getElementById("listArea").innerHTML = "<p style='text-align:center;color:#e74c3c;margin-top:40px'>⚠️ 불러오기 실패</p>";
   }
 }
-function renderList() {
-  const q = document.getElementById("searchInput").value;
-  const filtered = items.filter(i =>
-    i.title.includes(q) || i.paper.includes(q) || i.content.includes(q));
-  if (!filtered.length) {
-    document.getElementById("listArea").innerHTML =
-      `<div class="empty"><div class="empty-icon">📭</div><div>${q?"검색 결과가 없습니다.":"저장된 사설이 없습니다."}</div></div>`;
+
+// ── 블로그 목록 ───────────────────────
+async function loadBlogSources() {
+  const cached = localStorage.getItem(CACHE_SOURCES);
+  if (cached) blogSources = JSON.parse(cached);
+  try {
+    const res = await fetch(GAS_URL + "?action=blogSources");
+    const data = await res.json();
+    blogSources = data.items || [];
+    localStorage.setItem(CACHE_SOURCES, JSON.stringify(blogSources));
+    renderBlogTabs();
+  } catch(e) {}
+}
+async function loadBlogList() {
+  const cached = localStorage.getItem(CACHE_BLOG);
+  if (cached && !cacheBlogLoaded) {
+    blogItems = JSON.parse(cached);
+    document.getElementById("badgeBlog").textContent = blogItems.length;
+    cacheBlogLoaded = true;
+    renderList();
+    fetchBlog();
     return;
   }
-  document.getElementById("listArea").innerHTML = filtered.map(item => `
-    <div class="card" onclick="openRead('${item.id}')">
-      <div class="card-meta">${tagHtml(item.paper)}<span class="card-date">${fmtDate(item.date)}</span></div>
+  if (!cacheBlogLoaded)
+    document.getElementById("listArea").innerHTML = "<p style='text-align:center;color:#aaa;margin-top:40px'>불러오는 중...</p>";
+  await fetchBlog();
+}
+async function fetchBlog() {
+  try {
+    const res = await fetch(GAS_URL + "?action=blogList");
+    const data = await res.json();
+    blogItems = data.items || [];
+    localStorage.setItem(CACHE_BLOG, JSON.stringify(blogItems));
+    cacheBlogLoaded = true;
+    document.getElementById("badgeBlog").textContent = blogItems.length;
+    if (mode === "blog") renderList();
+  } catch(e) {
+    if (!cacheBlogLoaded)
+      document.getElementById("listArea").innerHTML = "<p style='text-align:center;color:#e74c3c;margin-top:40px'>⚠️ 불러오기 실패</p>";
+  }
+}
+
+// ── 블로그 탭 렌더 ────────────────────
+function renderBlogTabs() {
+  const c = document.getElementById("blogTabs");
+  const allActive = activeSourceId === "all";
+  let html = `<button class="blog-tab ${allActive?"active":""}" style="${allActive?"background:#e67e22":""}" onclick="setActiveSource('all')">전체</button>`;
+  html += blogSources.map(s => {
+    const a = activeSourceId === s.id;
+    return `<button class="blog-tab ${a?"active":""}" style="${a?"background:"+s.color:""}" onclick="setActiveSource('${s.id}')">${s.name}</button>`;
+  }).join("");
+  html += `<button class="blog-tab-manage" onclick="openModal()">⚙️ 관리</button>`;
+  c.innerHTML = html;
+}
+function setActiveSource(id) {
+  activeSourceId = id;
+  renderBlogTabs();
+  renderList();
+}
+
+// ── 목록 렌더 ─────────────────────────
+function renderList() {
+  const q = document.getElementById("searchInput").value;
+  let list = mode === "editorial" ? items : blogItems;
+
+  if (mode === "blog" && activeSourceId !== "all") {
+    const src = blogSources.find(s => s.id === activeSourceId);
+    if (src) list = list.filter(i => i.source === src.name);
+  }
+  list = list.filter(i => i.title.includes(q) || i.content.includes(q) || (i.paper||i.source||"").includes(q));
+
+  if (!list.length) {
+    document.getElementById("listArea").innerHTML =
+      `<div class="empty"><div class="empty-icon">📭</div><div>${q?"검색 결과가 없습니다.":"저장된 글이 없습니다."}</div></div>`;
+    return;
+  }
+  document.getElementById("listArea").innerHTML = list.map(item => {
+    const name = item.paper || item.source || "기타";
+    const color = item.paper ? (EDITORIAL_COLORS[item.paper]||"#7f8c8d") : getSourceColor(item.source);
+    return `<div class="card" onclick="openRead('${item.id}')">
+      <div class="card-meta">${tagHtml(name,color)}<span class="card-date">${fmtDate(item.date||item.savedAt)}</span></div>
       <div class="card-title">${item.title}</div>
       <div class="card-preview">${item.content}</div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 // ── 읽기 ─────────────────────────────
 function openRead(id) {
-  selectedItem = items.find(i => i.id == id);
+  const list = mode === "editorial" ? items : blogItems;
+  selectedItem = list.find(i => i.id == id);
   if (!selectedItem) return;
-  document.getElementById("readMeta").innerHTML =
-    tagHtml(selectedItem.paper) + `<span class="card-date">${fmtDate(selectedItem.date)}</span>`;
+  const name = selectedItem.paper || selectedItem.source || "기타";
+  const color = selectedItem.paper ? (EDITORIAL_COLORS[selectedItem.paper]||"#7f8c8d") : getSourceColor(selectedItem.source);
+  document.getElementById("readMeta").innerHTML = tagHtml(name,color) + `<span class="card-date">${fmtDate(selectedItem.date||selectedItem.savedAt)}</span>`;
   const titleEl = document.getElementById("readTitle");
   titleEl.textContent = selectedItem.title;
-  titleEl.style.borderBottom = `3px solid ${COLORS[selectedItem.paper]||COLORS['기타']}`;
+  titleEl.style.borderBottom = `3px solid ${color}`;
   document.getElementById("readContent").textContent = selectedItem.content;
   document.getElementById("progressBar").style.width = "0%";
   showView("read", false, true);
   window.scrollTo(0, 0);
 }
 
-// ── 새 사설 ──────────────────────────
+// ── 새 글 / 수정 폼 ──────────────────
 function openWrite() {
-  editMode = false; selPaper = "한겨레";
-  document.getElementById("formTitle").textContent = "✏️ 새 사설 저장";
+  editMode = false;
+  document.getElementById("saveBtn").className = "btn-save" + (mode==="blog"?" blog":"");
+  document.getElementById("formTitle").textContent = mode==="editorial" ? "✏️ 새 사설 저장" : "✏️ 새 블로그 글 저장";
   document.getElementById("saveBtn").textContent = "💾 저장하기";
   document.getElementById("fDate").value = todayStr();
   document.getElementById("fTitle").value = "";
   document.getElementById("fContent").value = "";
-  renderPaperBtns();
+  if (mode === "editorial") {
+    selPaper = "한겨레";
+    document.getElementById("sourceLabel").textContent = "신문사";
+    document.getElementById("dateLabel").style.display = "";
+    document.getElementById("fDate").style.display = "";
+    renderPaperBtns();
+  } else {
+    selBlogSource = blogSources[0]?.name || "";
+    document.getElementById("sourceLabel").textContent = "블로그";
+    document.getElementById("dateLabel").style.display = "none";
+    document.getElementById("fDate").style.display = "none";
+    renderBlogSourceBtns();
+  }
   showView("write", false, true);
 }
 
-// ── 수정 ─────────────────────────────
 function openEdit() {
-  editMode = true; selPaper = selectedItem.paper;
-  document.getElementById("formTitle").textContent = "✏️ 사설 수정";
+  editMode = true;
+  document.getElementById("saveBtn").className = "btn-save" + (mode==="blog"?" blog":"");
+  document.getElementById("formTitle").textContent = "✏️ 수정";
   document.getElementById("saveBtn").textContent = "✅ 수정 완료";
-  document.getElementById("fDate").value = selectedItem.date;
   document.getElementById("fTitle").value = selectedItem.title;
   document.getElementById("fContent").value = selectedItem.content;
-  renderPaperBtns();
+  if (mode === "editorial") {
+    selPaper = selectedItem.paper;
+    document.getElementById("sourceLabel").textContent = "신문사";
+    document.getElementById("dateLabel").style.display = "";
+    document.getElementById("fDate").style.display = "";
+    document.getElementById("fDate").value = toInputDate(selectedItem.date);
+    renderPaperBtns();
+  } else {
+    selBlogSource = selectedItem.source;
+    document.getElementById("sourceLabel").textContent = "블로그";
+    document.getElementById("dateLabel").style.display = "none";
+    document.getElementById("fDate").style.display = "none";
+    renderBlogSourceBtns();
+  }
   showView("write", false, true);
 }
 
-function cancelForm() {
-  history.back();
+function cancelForm() { history.back(); }
+
+function renderPaperBtns() {
+  document.getElementById("paperBtns").innerHTML = EDITORIAL_PAPERS.map(p => {
+    const a = selPaper === p;
+    return `<button class="paper-btn" onclick="selectPaper('${p}')"
+      style="${a?`background:${EDITORIAL_COLORS[p]};border-color:${EDITORIAL_COLORS[p]};color:#fff`:''}">${p}</button>`;
+  }).join("");
 }
+function selectPaper(p) { selPaper = p; renderPaperBtns(); }
+
+function renderBlogSourceBtns() {
+  if (!blogSources.length) {
+    document.getElementById("paperBtns").innerHTML = `<p style="color:#aaa;font-size:14px">⚙️ 블로그 관리에서 먼저 블로그를 추가해주세요</p>`;
+    return;
+  }
+  document.getElementById("paperBtns").innerHTML = blogSources.map(s => {
+    const a = selBlogSource === s.name;
+    return `<button class="paper-btn" onclick="selectBlogSource('${s.name}')"
+      style="${a?`background:${s.color};border-color:${s.color};color:#fff`:''}">${s.name}</button>`;
+  }).join("");
+}
+function selectBlogSource(name) { selBlogSource = name; renderBlogSourceBtns(); }
 
 // ── 저장/수정 제출 ────────────────────
 async function submitForm() {
-  const date = document.getElementById("fDate").value;
   const title = document.getElementById("fTitle").value.trim();
   const content = removeAds(document.getElementById("fContent").value);
-  if (!date || !title || !content) { toast("모든 항목을 입력해주세요."); return; }
-  document.getElementById("saveBtn").disabled = true;
-  document.getElementById("saveBtn").textContent = "저장 중...";
+  if (!title || !content) { toast("제목과 내용을 입력해주세요."); return; }
+
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true; btn.textContent = "저장 중...";
+
   try {
-    const body = editMode
-      ? {action:"update", data:{id:selectedItem.id, paper:selPaper, date, title, content}}
-      : {action:"save", data:{paper:selPaper, date, title, content}};
+    let body;
+    if (mode === "editorial") {
+      const date = document.getElementById("fDate").value;
+      if (!date) { toast("날짜를 입력해주세요."); btn.disabled=false; return; }
+      body = editMode
+        ? {action:"update", data:{id:selectedItem.id, paper:selPaper, date, title, content}}
+        : {action:"save", data:{paper:selPaper, date, title, content}};
+    } else {
+      if (!selBlogSource) { toast("블로그를 선택해주세요."); btn.disabled=false; return; }
+      body = editMode
+        ? {action:"updateBlog", data:{id:selectedItem.id, source:selBlogSource, title, content}}
+        : {action:"saveBlog", data:{source:selBlogSource, title, content}};
+    }
     const res = await fetch(GAS_URL, {method:"POST", body:JSON.stringify(body)});
     const data = await res.json();
     if (data.ok) {
       toast(editMode ? "✏️ 수정되었습니다!" : "✅ 저장되었습니다!");
-      await fetchFromGAS();
-      history.replaceState({view:"list"}, "", "");
+      if (mode === "editorial") { cacheEditorialLoaded = false; await fetchEditorial(); }
+      else { cacheBlogLoaded = false; await fetchBlog(); }
+      history.replaceState({view:"list", mode}, "", "");
       showView("list", false, false);
     } else toast("⚠️ 오류: "+data.error);
   } catch(e) { toast("⚠️ 저장 실패"); }
-  document.getElementById("saveBtn").disabled = false;
+  btn.disabled = false;
 }
 
 // ── 삭제 ─────────────────────────────
 async function deleteSelected() {
-  if (!confirm("이 사설을 삭제할까요?")) return;
+  if (!confirm("이 글을 삭제할까요?")) return;
   try {
-    const res = await fetch(GAS_URL, {method:"POST",
-      body:JSON.stringify({action:"delete", id:selectedItem.id})});
+    const action = mode === "editorial" ? "delete" : "deleteBlog";
+    const res = await fetch(GAS_URL, {method:"POST", body:JSON.stringify({action, id:selectedItem.id})});
     const data = await res.json();
     if (data.ok) {
       toast("🗑️ 삭제되었습니다.");
-      items = items.filter(i => i.id != selectedItem.id);
-      localStorage.setItem(CACHE_KEY, JSON.stringify(items));
-      document.getElementById("badge").textContent = items.length;
+      if (mode === "editorial") {
+        items = items.filter(i => i.id != selectedItem.id);
+        localStorage.setItem(CACHE_EDITORIAL, JSON.stringify(items));
+        document.getElementById("badgeEditorial").textContent = items.length;
+      } else {
+        blogItems = blogItems.filter(i => i.id != selectedItem.id);
+        localStorage.setItem(CACHE_BLOG, JSON.stringify(blogItems));
+        document.getElementById("badgeBlog").textContent = blogItems.length;
+      }
       renderList();
-      history.replaceState({view:"list"}, "", "");
+      history.replaceState({view:"list", mode}, "", "");
       showView("list", false, false);
     } else toast("⚠️ 삭제 실패");
   } catch(e) { toast("⚠️ 삭제 실패"); }
 }
 
+// ── 블로그 관리 모달 ──────────────────
+function openModal() {
+  renderColorPicks();
+  renderSourceList();
+  document.getElementById("modalBg").classList.add("open");
+}
+function closeModal(e) {
+  if (e.target === document.getElementById("modalBg")) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById("modalBg").classList.remove("open");
+  document.getElementById("newSourceName").value = "";
+  renderBlogTabs();
+}
+function renderColorPicks() {
+  document.getElementById("colorPicks").innerHTML = PALETTE.map(c =>
+    `<div class="color-pick ${selNewColor===c?"selected":""}" style="background:${c}" onclick="selectColor('${c}')"></div>`
+  ).join("");
+}
+function selectColor(c) { selNewColor = c; renderColorPicks(); }
+function renderSourceList() {
+  document.getElementById("sourceList").innerHTML = blogSources.length
+    ? blogSources.map(s => `
+        <div class="source-item">
+          <span style="display:flex;align-items:center;gap:8px;">
+            <span style="width:14px;height:14px;border-radius:50%;background:${s.color};display:inline-block;"></span>
+            <span class="source-name">${s.name}</span>
+          </span>
+          <button class="source-del" onclick="deleteBlogSource('${s.id}')">🗑️</button>
+        </div>`).join("")
+    : `<p style="color:#aaa;font-size:14px;text-align:center;padding:12px 0;">등록된 블로그가 없습니다.</p>`;
+}
+async function addBlogSource() {
+  const name = document.getElementById("newSourceName").value.trim();
+  if (!name) { toast("블로그 이름을 입력해주세요."); return; }
+  if (blogSources.find(s => s.name === name)) { toast("이미 존재하는 블로그입니다."); return; }
+  try {
+    const res = await fetch(GAS_URL, {method:"POST", body:JSON.stringify({action:"saveBlogSource", data:{name, color:selNewColor}})});
+    const data = await res.json();
+    if (data.ok) {
+      blogSources.push({id:data.id, name, color:selNewColor});
+      localStorage.setItem(CACHE_SOURCES, JSON.stringify(blogSources));
+      document.getElementById("newSourceName").value = "";
+      renderSourceList();
+      toast("✅ 블로그가 추가됐어요!");
+    }
+  } catch(e) { toast("⚠️ 추가 실패"); }
+}
+async function deleteBlogSource(id) {
+  if (!confirm("이 블로그를 삭제할까요?\n해당 블로그의 글은 삭제되지 않습니다.")) return;
+  try {
+    const res = await fetch(GAS_URL, {method:"POST", body:JSON.stringify({action:"deleteBlogSource", id})});
+    const data = await res.json();
+    if (data.ok) {
+      blogSources = blogSources.filter(s => s.id != id);
+      localStorage.setItem(CACHE_SOURCES, JSON.stringify(blogSources));
+      renderSourceList();
+      toast("🗑️ 삭제됐어요.");
+    }
+  } catch(e) { toast("⚠️ 삭제 실패"); }
+}
+
 // ── 자동스크롤 ───────────────────────
 let scrollTimer = null, scrolling = false;
-
-function toggleScroll() {
-  scrolling ? stopScroll() : startScroll();
-}
+function toggleScroll() { scrolling ? stopScroll() : startScroll(); }
 function startScroll() {
   scrolling = true;
   document.getElementById("scrollBar").classList.add("on");
@@ -419,8 +672,7 @@ function runScroll() {
 }
 function restartScroll() {
   if (!scrolling) return;
-  clearTimeout(scrollTimer);
-  runScroll();
+  clearTimeout(scrollTimer); runScroll();
 }
 function toggleScrollPlay() {
   if (scrollTimer) {
@@ -440,15 +692,7 @@ function stopScroll() {
   document.getElementById("scrollPlayBtn").textContent = "⏸";
 }
 
-// 오늘 날짜 기본값
-function todayStr() {
-  const d = new Date();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const day = String(d.getDate()).padStart(2,"0");
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-
-// 진행 바
+// ── 진행바 ────────────────────────────
 function updateProgress() {
   const scrollTop = window.scrollY;
   const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -456,9 +700,12 @@ function updateProgress() {
   document.getElementById("progressBar").style.width = pct + "%";
 }
 window.addEventListener("scroll", updateProgress);
+
+// ── 초기화 ───────────────────────────
 loadSettings();
-history.replaceState({view:"list"}, "", "");
-loadList();
+loadBlogSources();
+history.replaceState({view:"list", mode:"editorial"}, "", "");
+loadEditorialList();
 </script>
 </body>
 </html>
