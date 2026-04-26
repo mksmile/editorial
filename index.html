@@ -115,10 +115,10 @@
 <header>
   <div class="header-left">
     <button class="mode-btn active" id="btnModeEditorial" onclick="switchMode('editorial')">
-      📰 사설 <span class="badge" id="badgeEditorial">0</span>
+      📰 <span class="mode-label">사설</span> <span class="badge" id="badgeEditorial">0</span>
     </button>
     <button class="mode-btn" id="btnModeBlog" onclick="switchMode('blog')">
-      📖 블로그 <span class="badge" id="badgeBlog">0</span>
+      📖 <span class="mode-label" style="display:none">블로그</span> <span class="badge" id="badgeBlog">0</span>
     </button>
   </div>
   <div class="header-right">
@@ -265,8 +265,10 @@ function toggleSettings() {
 // ── 모드 전환 ─────────────────────────
 function switchMode(m) {
   mode = m;
-  document.getElementById("btnModeEditorial").style.display = m==="blog" ? "none" : "";
-  document.getElementById("btnModeBlog").style.display = m==="editorial" ? "none" : "";
+  // 활성 버튼은 글자 보이고, 비활성 버튼은 글자 숨김
+  document.querySelectorAll(".mode-label").forEach(el => el.style.display = "none");
+  const activeBtn = m === "editorial" ? "btnModeEditorial" : "btnModeBlog";
+  document.querySelector("#" + activeBtn + " .mode-label").style.display = "";
   document.getElementById("btnModeEditorial").className = "mode-btn" + (m==="editorial"?" active":"");
   document.getElementById("btnModeBlog").className = "mode-btn" + (m==="blog"?" active blog-active":"");
   document.getElementById("newBtn").className = "new-btn" + (m==="blog"?" blog":"");
@@ -718,7 +720,6 @@ window.addEventListener("scroll", updateProgress);
 loadSettings();
 loadBlogSources();
 history.replaceState({view:"list", mode:"editorial"}, "", "");
-document.getElementById("btnModeBlog").style.display = "none";
 loadEditorialList();
 </script>
 </body>
